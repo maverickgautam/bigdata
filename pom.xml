@@ -1,0 +1,501 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.big.data</groupId>
+    <artifactId>bigdata</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <!--maven/projects related properties -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
+        <scala.version>2.10.5</scala.version>
+        <sonar.language>java</sonar.language>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--maven plugin version -->
+        <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
+        <maven.release.plugin.version>2.5.2</maven.release.plugin.version>
+        <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
+        <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
+        <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
+        <maven.sonar.maven.plugin.version>2.7</maven.sonar.maven.plugin.version>
+        <maven.avro.plugin.version>1.8.1</maven.avro.plugin.version>
+        <maven.shaded.plugin>2.4.1</maven.shaded.plugin>
+        <maven.gatling.plugin>2.2.1</maven.gatling.plugin>
+        <maven.scala.plugin>3.2.1</maven.scala.plugin>
+
+        <!--cloudera/core tech stack related properties -->
+        <hadoop.version>2.6.0-cdh5.9.0</hadoop.version>
+        <hbase.version>1.2.0-cdh5.9.0</hbase.version>
+        <spark.version>1.6.0-cdh5.9.0</spark.version>
+        <oozie.client>4.1.0-cdh5.9.0</oozie.client>
+        <aerospike.client.version>3.2.2</aerospike.client.version>
+        <quartz.properties>2.2.1</quartz.properties>
+        <camus-api.version>0.1.0</camus-api.version>
+        <camus-etl-kafka.version>0.1.0</camus-etl-kafka.version>
+        <avro.version>1.8.1</avro.version>
+        <parquet-avro.version>1.5.0-cdh5.9.0</parquet-avro.version>
+        <protostuff.version>1.0.9</protostuff.version>
+        <kafka-clients.version>0.9.0.0</kafka-clients.version>
+        <databrick.spark.avro.version>3.0.0</databrick.spark.avro.version>
+
+        <!--commons properties-->
+        <commons-lang.version>2.6</commons-lang.version>
+        <commons-configuration.version>1.10</commons-configuration.version>
+        <commons-io.version>2.4</commons-io.version>
+        <commons.httpclient>3.1</commons.httpclient>
+        <apache.commons-io.version>1.3.2</apache.commons-io.version>
+        <apache.commons.lang3.version>3.4</apache.commons.lang3.version>
+        <commons.dbcp2>2.1.1</commons.dbcp2>
+        <commons-lang.version>2.6</commons-lang.version>
+        <commons-math3.version>3.2</commons-math3.version>
+        <commons-cli.version>1.3.1</commons-cli.version>
+        <mysql.conntector.java>6.0.2</mysql.conntector.java>
+        <codahale.metrics.version>3.0.2</codahale.metrics.version>
+
+        <!--apache related properties-->
+        <apache.beans.version>1.9.2</apache.beans.version>
+        <apache.httpclient>4.5.2</apache.httpclient>
+
+        <!--testing related  properties-->
+        <jacoco.plugin.version>0.7.5.201505241946</jacoco.plugin.version>
+        <power.mock.version>1.6.5</power.mock.version>
+        <junit.version>4.12</junit.version>
+        <mockito-all.version>1.10.19</mockito-all.version>
+
+        <slf4j.version>1.7.12</slf4j.version>
+        <slf4j.version>1.7.12</slf4j.version>
+        <guice.version>4.0</guice.version>
+        <aspectjtools.version>1.8.9</aspectjtools.version>
+        <annotations.version>3.0.1u2</annotations.version>
+        <reflections.version>0.9.10</reflections.version>
+        <rest-assured.version>2.9.0</rest-assured.version>
+        <json-schema-validator.version>3.0.1</json-schema-validator.version>
+
+        <confluent.version>2.0.0</confluent.version>
+        <jackson.version>2.7.3</jackson.version>
+        <gson.version>2.3.1</gson.version>
+        <fastutil.version>7.0.12</fastutil.version>
+        <stringtemplate.version>3.2</stringtemplate.version>
+        <validation-api.version>1.1.0.Final</validation-api.version>
+        <container.version>2.8.0</container.version>
+        <javax.json-api.version>1.0</javax.json-api.version>
+        <htrace-core.version>3.0.4</htrace-core.version>
+        <kryo.version>2.21</kryo.version>
+
+    </properties>
+
+
+    <modules>
+        <module>mapreduce</module>
+    </modules>
+
+    <scm>
+        <connection>scm:git:git@github.com:maverickgautam/bigdata.git</connection>
+        <url>scm:git:git@github.com:maverickgautam/bigdata.git</url>
+        <developerConnection>scm:git:git@github.com:maverickgautam/bigdata.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+
+    <repositories>
+        <repository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Default compile -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Default test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+    <dependencyManagement>
+        <dependencies>
+            <!--Spark dependencies-->
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql_2.10</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-core_2.10</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.databricks</groupId>
+                <artifactId>spark-csv_2.10</artifactId>
+                <version>${spark-csv.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+
+            <!--hadoop dependencies-->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>${hadoop.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-auth</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-core</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-core</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+
+
+            <!--avro, parquet dependencies-->
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>${avro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twitter</groupId>
+                <artifactId>parquet-avro</artifactId>
+                <version>${parquet-avro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-schema-registry-client</artifactId>
+                <version>${confluent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>${confluent.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.databricks</groupId>
+                <artifactId>spark-avro_2.10</artifactId>
+                <version>${databrick.spark.avro.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${apache.commons.lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>${commons-configuration.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.9</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda-time.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>${commons-math3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-cli</groupId>
+                <artifactId>commons-cli</artifactId>
+                <version>${commons-cli.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>${commons.httpclient}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${apache.commons-io.version}</version>
+            </dependency>
+
+            <!-- Guice dependency -->
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-multibindings</artifactId>
+                <version>${guice.version}</version>
+            </dependency>
+
+            <!-- Testing dependencies -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${power.mock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito-all.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <version>${power.mock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- apache other related dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${apache.beans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${apache.httpclient}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codahale.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${codahale.metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjtools</artifactId>
+                <version>${aspectjtools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>stringtemplate</artifactId>
+                <version>${stringtemplate.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven.jar.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${maven.sonar.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven.shaded.plugin}</version>
+                    <configuration>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <configuration>
+                        <tarLongFileMode>posix</tarLongFileMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>dist-main</id>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>avro-maven-plugin</artifactId>
+                    <version>${maven.avro.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>schemas</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>schema</goal>
+                                <goal>protocol</goal>
+                                <goal>idl-protocol</goal>
+                            </goals>
+                            <configuration>
+                                <stringType>String</stringType>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>io.gatling</groupId>
+                    <artifactId>gatling-maven-plugin</artifactId>
+                    <version>${maven.gatling.plugin}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>${maven.scala.plugin}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <defaultGoal>install</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven.release.plugin.version}</version>
+                <configuration>
+                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+                    <tagNameFormat>gap-${project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
