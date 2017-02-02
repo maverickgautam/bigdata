@@ -42,9 +42,9 @@ public class EvenOddNumberMapper extends Mapper<LongWritable, Text, IntWritable,
         output.set(number);
         if ((number % 2) == 0) {
             // part -> file names needed to be appended in multiOutput
-            multipleOutput.write(MULTI_OUTPUT_NAME, output, NullWritable.get(), EVEN_KEY_PATH+"part");
+            multipleOutput.write(MULTI_OUTPUT_NAME, output, NullWritable.get(), EVEN_KEY_PATH + "part");
         } else {
-            multipleOutput.write(MULTI_OUTPUT_NAME, output, NullWritable.get(), ODD_KEY_PATH+"part");
+            multipleOutput.write(MULTI_OUTPUT_NAME, output, NullWritable.get(), ODD_KEY_PATH + "part");
         }
     }
 

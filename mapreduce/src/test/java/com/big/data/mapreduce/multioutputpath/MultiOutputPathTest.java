@@ -1,6 +1,5 @@
 package com.big.data.mapreduce.multioutputpath;
 
-import com.big.data.mapreduce.wordcount.WordCountDriver;
 import com.cloudera.org.joda.time.DateTime;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -62,7 +61,8 @@ public class MultiOutputPathTest {
         MultiOutputPathDriver driver = new MultiOutputPathDriver();
 
         // Any argument passed with -DKey=Value will be parsed by ToolRunner
-        String[] args = new String[]{"-D" + WordCountDriver.INPUT_PATH + "=" + baseDir, "-D" + WordCountDriver.OUTPUT_PATH + "=" + outputDir};
+        String[] args = new String[]{"-D" + MultiOutputPathDriver.INPUT_PATH + "=" + baseDir, "-D" + MultiOutputPathDriver.OUTPUT_PATH + "=" +
+                outputDir};
         driver.main(args);
 
         //Read the data from the outputfile
