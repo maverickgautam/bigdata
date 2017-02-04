@@ -41,7 +41,7 @@ public class CountryToAirlineDriverTest {
         conf.set("fs.default.name", "file:///");
         conf.set("mapred.job.tracker", "local");
         fs = FileSystem.getLocal(conf);
-        baseDir = "/tmp/fetch/" + UUID.randomUUID().toString() + "/";
+        baseDir = "/tmp/mapreduce/mapsideJoin/" + UUID.randomUUID().toString() + "/";
 
         input = baseDir + "inputdir";
         distrubutedFilePath = baseDir + "distributed" + "/distributed.txt";
@@ -97,13 +97,14 @@ public class CountryToAirlineDriverTest {
 
     @Test
     public void countryToAirlineTest() throws Exception {
-        CountryToAirlineDriver driver = new CountryToAirlineDriver();
 
         // Any argument passed with -DKey=Value will be parsed by ToolRunner
         String[] args = new String[]{"-D" + CountryToAirlineDriver.INPUT_PATH + "=" + input, "-D" + CountryToAirlineDriver
                 .INPUT_PATH_FOR_FILE_TO_BE_DISTRIBUTED
                 + "=" + distrubutedFilePath, "-D" + CountryToAirlineDriver.OUTPUT_PATH + "=" + outputDir};
-        driver.main(args);
+
+        // call the main function to run the job
+        CountryToAirlineDriver.main(args);
 
         fileToHashMap(outputDir + "/part-m-00000");
 

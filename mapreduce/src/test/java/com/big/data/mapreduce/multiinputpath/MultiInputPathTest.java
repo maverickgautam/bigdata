@@ -40,7 +40,7 @@ public class MultiInputPathTest {
         conf.set("fs.default.name", "file:///");
         conf.set("mapred.job.tracker", "local");
         fs = FileSystem.getLocal(conf);
-        baseDir = "/tmp/fetch/" + UUID.randomUUID().toString() + "/";
+        baseDir = "/tmp/mapreduce/multiinputPath/" + UUID.randomUUID().toString() + "/";
 
         leftdir = baseDir + "left";
         rightdir = baseDir + "right";
@@ -84,12 +84,13 @@ public class MultiInputPathTest {
 
     @Test
     public void multiInputTest() throws Exception {
-        MultiInputPathDriver driver = new MultiInputPathDriver();
 
         // Any argument passed with -DKey=Value will be parsed by ToolRunner
         String[] args = new String[]{"-D" + MultiInputPathDriver.INPUT_PATH_LEFT + "=" + leftdir, "-D" + MultiInputPathDriver.INPUT_PATH_RIGHT + "=" +
                 rightdir, "-D" + MultiInputPathDriver.OUTPUT_PATH + "=" + outputDir};
-        driver.main(args);
+
+        // call the main function to run the job
+        MultiInputPathDriver.main(args);
 
         //Two mappers have been spawned because, Two input files are there and InputFormat is TextInputFormat (with CombinedTextInputFormat this
         // will not be the case)

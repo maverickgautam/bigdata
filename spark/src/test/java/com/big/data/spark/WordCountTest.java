@@ -1,4 +1,4 @@
-package com.big.data.mapreduce.wordcount;
+package com.big.data.spark;
 
 import com.cloudera.org.joda.time.DateTime;
 import org.apache.commons.io.FileUtils;
@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by kunalgautam on 01.02.17.
+ * Created by kunalgautam on 04.02.17.
  */
-public class WordCountDriverTest {
+public class WordCountTest {
 
     private final Configuration conf = new Configuration();
     private static FileSystem fs;
@@ -33,10 +33,11 @@ public class WordCountDriverTest {
 
         Configuration conf = new Configuration();
         //set the fs to file:/// which means the local fileSystem
+        // change this to point to your cluster Namenode
         conf.set("fs.default.name", "file:///");
-        conf.set("mapred.job.tracker", "local");
+
         fs = FileSystem.getLocal(conf);
-        baseDir = "/tmp/mapreduce/wordcount/" + UUID.randomUUID().toString();
+        baseDir = "/tmp/spark/WordCountSpark/" + UUID.randomUUID().toString();
         outputDir = baseDir + "/output";
 
         File tempFile = new File(baseDir + "/input.txt");
@@ -58,17 +59,18 @@ public class WordCountDriverTest {
     public void WordCount() throws Exception {
 
         // Any argument passed with -DKey=Value will be parsed by ToolRunner
-        String[] args = new String[]{"-D" + WordCountDriver.INPUT_PATH + "=" + baseDir, "-D" + WordCountDriver.OUTPUT_PATH + "=" + outputDir};
-        WordCountDriver.main(args);
+        String[] args = new String[]{"-D" + WordCount.INPUT_PATH + "=" + baseDir, "-D" + WordCount.OUTPUT_PATH + "=" + outputDir, "-D" + WordCount
+                .IS_RUN_LOCALLY + "=true", "-D" + WordCount.DEFAULT_FS + "=file:///", "-D" + WordCount.NUM_PARTITIONS + "=1"};
+        WordCount.main(args);
 
         //Read the data from the outputfile
-        File outputFile = new File(outputDir + "/part-r-00000");
+        File outputFile = new File(outputDir + "/part-00000");
         String fileToString = FileUtils.readFileToString(outputFile, "UTF-8");
         Map<String, Integer> wordToCount = new HashMap<>();
 
         //4 lines in output file, with one word per line
         Arrays.stream(fileToString.split(NEW_LINE_DELIMETER)).forEach(e -> {
-            String[] wordCount = e.split("\t");
+            String[] wordCount = e.substring(e.indexOf("(") + 1, e.indexOf(")")).split(",");
             wordToCount.put(wordCount[0], Integer.parseInt(wordCount[1]));
         });
 

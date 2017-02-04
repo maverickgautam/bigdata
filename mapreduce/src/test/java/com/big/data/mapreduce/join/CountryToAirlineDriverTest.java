@@ -40,7 +40,7 @@ public class CountryToAirlineDriverTest {
         conf.set("fs.default.name", "file:///");
         conf.set("mapred.job.tracker", "local");
         fs = FileSystem.getLocal(conf);
-        baseDir = "/tmp/fetch/" + UUID.randomUUID().toString() + "/";
+        baseDir = "/tmp/mapreduce/join/" + UUID.randomUUID().toString() + "/";
 
         leftdir = baseDir + "left";
         rightdir = baseDir + "right";
@@ -96,12 +96,12 @@ public class CountryToAirlineDriverTest {
 
     @Test
     public void countryToAirlineTest() throws Exception {
-        CountryToAirlineDriver driver = new CountryToAirlineDriver();
 
         // Any argument passed with -DKey=Value will be parsed by ToolRunner
         String[] args = new String[]{"-D" + CountryToAirlineDriver.INPUT_PATH_LEFT + "=" + leftdir, "-D" + CountryToAirlineDriver.INPUT_PATH_RIGHT
                 + "=" + rightdir, "-D" + CountryToAirlineDriver.OUTPUT_PATH + "=" + outputDir};
-        driver.main(args);
+        // call the main function to run the job
+        CountryToAirlineDriver.main(args);
 
         fileToHashMap(outputDir + "/part-r-00000");
 

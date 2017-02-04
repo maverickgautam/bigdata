@@ -97,6 +97,7 @@
 
     <modules>
         <module>mapreduce</module>
+        <module>spark</module>
     </modules>
 
     <scm>
