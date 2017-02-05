@@ -1,0 +1,22 @@
+{
+    "name": "com.big.data.avro.schema.Employee",
+    "type": "record",
+    "fields": [{
+            "name": "emp_id",
+            "type": "int"
+        },
+        {
+             "name": "emp_name",
+             "type": "string"
+        },
+        {
+              "name": "emp_country",
+              "type": "string"
+        },
+       {
+             "name": "subordinates",
+             "type": ["null", {"type": "map", "values": "string"}],
+             "default": null
+        }
+        ]
+ }
