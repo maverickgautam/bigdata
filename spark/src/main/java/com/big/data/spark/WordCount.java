@@ -47,7 +47,6 @@ public class WordCount extends Configured implements Tool, Closeable {
 
         if (defaultFs != null) {
             sparkContext.hadoopConfiguration().set("fs.defaultFS", defaultFs);
-            sparkContext.hadoopConfiguration().set("dfs.client.use.datanode.hostname", "true");
         }
 
         return sparkContext;
@@ -79,6 +78,7 @@ public class WordCount extends Configured implements Tool, Closeable {
                 // How many partitions to slpit the output into
                 .repartition(conf.getInt(conf.get(NUM_PARTITIONS), 1))
                 .saveAsTextFile(outputPath);
+        // No Anynomous class has been used anywhere and hence, The outer class need not implement Serialzable
 
         return 0;
     }
