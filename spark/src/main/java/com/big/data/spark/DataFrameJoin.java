@@ -8,12 +8,12 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.types.StructType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -21,17 +21,20 @@ import java.io.IOException;
 /**
  * Created by kunalgautam on 05.02.17.
  */
-public class ReadWriteAvroParquetFiles extends Configured implements Tool, Closeable {
+public class DataFrameJoin extends Configured implements Tool, Closeable {
 
-    public static final String INPUT_PATH = "spark.input.path";
+    public static final String PARQUET_INPUT_PATH = "spark.parquet.input.path";
+    public static final String JSON_INPUT_PATH = "spark.json.input.path";
+
     public static final String OUTPUT_PATH = "spark.output.path";
     public static final String IS_RUN_LOCALLY = "spark.is.run.local";
     public static final String DEFAULT_FS = "spark.default.fs";
     public static final String NUM_PARTITIONS = "spark.num.partitions";
-    private static final String NEW_LINE_DELIMETER = "\n";
+    public static final String NEW_LINE_DELIMETER = "\n";
 
     private SQLContext sqlContext;
     private JavaSparkContext javaSparkContext;
+    private static final Logger LOG = LoggerFactory.getLogger(DataFrameJoin.class);
 
     protected <T> JavaSparkContext getJavaSparkContext(final boolean isRunLocal,
                                                        final String defaultFs,
@@ -59,7 +62,12 @@ public class ReadWriteAvroParquetFiles extends Configured implements Tool, Close
 
         //The arguments passed has been split into Key value by ToolRunner
         Configuration conf = getConf();
-        String inputPath = conf.get(INPUT_PATH);
+
+        //Left path Parquet
+        String parquetinputPath = conf.get(PARQUET_INPUT_PATH);
+
+        //Right Path JSON
+        String jsonInputPath = conf.get(JSON_INPUT_PATH);
 
         String outputPath = conf.get(OUTPUT_PATH);
 
@@ -73,21 +81,37 @@ public class ReadWriteAvroParquetFiles extends Configured implements Tool, Close
 
         // Avro schema to StructType conversion
         final StructType outPutSchemaStructType = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
+        // read data from parquetfile, the schema of the data is taken from the avro schema (Schema Employee -> Country)
+        DataFrame parquetDFLeft = sqlContext.read().format(Employee.class.getCanonicalName()).parquet(parquetinputPath);
 
-        // read data from parquetfile, the schema of the data is taken from the avro schema
-        DataFrame inputDf = sqlContext.read().format(Employee.class.getCanonicalName()).parquet(inputPath);
+        // show() is a action so donot have it enabled unecessary
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Schema and Data from parquet file is ");
+            parquetDFLeft.printSchema();
+            parquetDFLeft.show();
+        }
 
-        // convert DataFrame into JavaRDD
-        // the rows read from the parquetfile is converted into a Row object . Row has same schema as that of the parquet file roe
-        JavaRDD<Row> rowJavaRDD = inputDf.javaRDD();
+        // Read Json file from Right (Json file schema  : country -> langage )
+        DataFrame jsonDataframeRight = sqlContext.read().json(jsonInputPath);
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Schema and Data from Json file is ");
+            jsonDataframeRight.printSchema();
+            jsonDataframeRight.show();
+        }
 
-        DataFrame outputDf = sqlContext.createDataFrame(rowJavaRDD, outPutSchemaStructType);
+        // Inner Join
+        // various Join Type =>  "inner", "outer", "full", "fullouter", "leftouter", "left", "rightouter", "right", "leftsemi"
+        DataFrame join = parquetDFLeft.join(jsonDataframeRight, parquetDFLeft.col("emp_country").equalTo(jsonDataframeRight.col
+                ("country")));
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Schema and Data from Join is  ");
+            join.printSchema();
+            join.show();
+        }
 
-        // Convert JavaRDD to dataframe and save into parquet file
-        outputDf
-                .write()
-                .format(Employee.class.getCanonicalName())
-                .parquet(outputPath);
+        join.write()
+            .format(Employee.class.getCanonicalName())
+            .parquet(outputPath);
 
         return 0;
     }
@@ -98,7 +122,6 @@ public class ReadWriteAvroParquetFiles extends Configured implements Tool, Close
     }
 
     public static void main(String[] args) throws Exception {
-        ToolRunner.run(new ReadWriteAvroParquetFiles(), args);
+        ToolRunner.run(new DataFrameJoin(), args);
     }
-
 }

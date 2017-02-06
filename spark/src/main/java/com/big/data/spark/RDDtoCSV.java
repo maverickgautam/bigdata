@@ -1,7 +1,6 @@
 package com.big.data.spark;
 
 import com.big.data.avro.schema.Employee;
-import com.databricks.spark.avro.SchemaConverters;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -13,23 +12,31 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.types.Metadata;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
 
+import static org.apache.spark.sql.types.DataTypes.IntegerType;
+import static org.apache.spark.sql.types.DataTypes.StringType;
+
 /**
- * Created by kunalgautam on 05.02.17.
+ * Created by kunalgautam on 06.02.17.
  */
-public class ReadWriteAvroParquetFiles extends Configured implements Tool, Closeable {
+public class RDDtoCSV extends Configured implements Tool, Closeable {
 
     public static final String INPUT_PATH = "spark.input.path";
     public static final String OUTPUT_PATH = "spark.output.path";
     public static final String IS_RUN_LOCALLY = "spark.is.run.local";
     public static final String DEFAULT_FS = "spark.default.fs";
     public static final String NUM_PARTITIONS = "spark.num.partitions";
-    private static final String NEW_LINE_DELIMETER = "\n";
+    public static final String NEW_LINE_DELIMETER = "\n";
 
+    private static final Logger LOG = LoggerFactory.getLogger(DataFrameJoin.class);
     private SQLContext sqlContext;
     private JavaSparkContext javaSparkContext;
 
@@ -71,23 +78,48 @@ public class ReadWriteAvroParquetFiles extends Configured implements Tool, Close
         //To set any configuration use javaSparkContext.hadoopConfiguration().set(Key,value);
         // To set any custom inputformat use javaSparkContext.newAPIHadoopFile() and get a RDD
 
-        // Avro schema to StructType conversion
-        final StructType outPutSchemaStructType = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
+        // Schema for the CSV
+        // Various supported Type  protected lazy val primitiveType: Parser[DataType] =
+//        ( "StringType" ^^^ StringType
+//                | "FloatType" ^^^ FloatType
+//                | "IntegerType" ^^^ IntegerType
+//                | "ByteType" ^^^ ByteType
+//                | "ShortType" ^^^ ShortType
+//                | "DoubleType" ^^^ DoubleType
+//                | "LongType" ^^^ LongType
+//                | "BinaryType" ^^^ BinaryType
+//                | "BooleanType" ^^^ BooleanType
+//                | "DateType" ^^^ DateType
+//                | "DecimalType()" ^^^ DecimalType.USER_DEFAULT
+//                | fixedDecimalType
+//                | "TimestampType" ^^^ TimestampType
+//        )
+        final StructType outPutSchemaStructType = new StructType(new StructField[]{
+                new StructField("emp_id", IntegerType, false, Metadata.empty()),
+                new StructField("emp_name", StringType, false, Metadata.empty()),
+        });
 
         // read data from parquetfile, the schema of the data is taken from the avro schema
         DataFrame inputDf = sqlContext.read().format(Employee.class.getCanonicalName()).parquet(inputPath);
 
         // convert DataFrame into JavaRDD
         // the rows read from the parquetfile is converted into a Row object . Row has same schema as that of the parquet file roe
-        JavaRDD<Row> rowJavaRDD = inputDf.javaRDD();
+        JavaRDD<Row> rowJavaRDD = inputDf.select("emp_id", "emp_name").javaRDD();
 
         DataFrame outputDf = sqlContext.createDataFrame(rowJavaRDD, outPutSchemaStructType);
+        // show() is a action so donot have it enabled unecessary
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Schema and Data from parquet file is ");
+            outputDf.printSchema();
+            outputDf.show();
+        }
 
-        // Convert JavaRDD to dataframe and save into parquet file
-        outputDf
-                .write()
-                .format(Employee.class.getCanonicalName())
-                .parquet(outputPath);
+        // Convert JavaRDD  to CSV and save as text file
+        outputDf.write()
+                .format("com.databricks.spark.csv")
+                // Header => true, will enable to have header in each file
+                .option("header", "true")
+                .save(outputPath);
 
         return 0;
     }
@@ -98,7 +130,6 @@ public class ReadWriteAvroParquetFiles extends Configured implements Tool, Close
     }
 
     public static void main(String[] args) throws Exception {
-        ToolRunner.run(new ReadWriteAvroParquetFiles(), args);
+        ToolRunner.run(new RDDtoCSV(), args);
     }
-
 }

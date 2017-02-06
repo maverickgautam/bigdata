@@ -91,6 +91,7 @@
         <javax.json-api.version>1.0</javax.json-api.version>
         <htrace-core.version>3.0.4</htrace-core.version>
         <kryo.version>2.21</kryo.version>
+        <spark-csv.version>1.5.0</spark-csv.version>
 
     </properties>
 
@@ -161,6 +162,7 @@
                 <version>${spark-csv.version}</version>
                 <scope>compile</scope>
             </dependency>
+
 
             <!--Hbase dependencies-->
             <dependency>

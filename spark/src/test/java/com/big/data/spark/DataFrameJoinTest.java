@@ -6,6 +6,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
+import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,48 +21,65 @@ import parquet.hadoop.metadata.CompressionCodecName;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by kunalgautam on 05.02.17.
  */
-public class ReadWriteAvroParquetFilesTest {
+public class DataFrameJoinTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReadWriteAvroParquetFilesTest.class);
-    private static final String BASEDIR = "/tmp/ReadWriteAvroParquetFilesTest/avroparquetInputFile/" + System.currentTimeMillis() + "/";
-    private String input;
+    private static final String BASEDIR = "/tmp/DataFrameJoinTest/avroparquetInputFile/" + System.currentTimeMillis() + "/";
+    private String parquetInput;
+    private String jsonInput;
     private String output;
 
     private Employee employee;
 
     @Before
-    public void setUp() throws IOException {
+    public void inputDataPreperation() throws IOException {
 
-        input = BASEDIR + "input/";
+        parquetInput = BASEDIR + "parquetInput/";
+        jsonInput = BASEDIR + "jsonInput";
         output = BASEDIR + "output/";
 
+
+        // WRITE parquet file
         employee = new Employee();
         employee.setEmpId(1);
         employee.setEmpName("Maverick");
         employee.setEmpCountry("DE");
 
         //Write parquet file with GZIP compression
-        ParquetWriter<Object> writer = AvroParquetWriter.builder(new Path(input + "1.gz.parquet")).withCompressionCodec
+        ParquetWriter<Object> writer = AvroParquetWriter.builder(new Path(parquetInput + "1.gz.parquet")).withCompressionCodec
                 (CompressionCodecName.GZIP).withSchema(Employee.getClassSchema()).build();
         writer.write(employee);
         writer.close();
 
+
+        //Write the data into the local filesystem  for Left input
+        File tempFileleft = new File(jsonInput + "/input.txt");
+        Map<String,Object> jsonMap = new HashMap<>();
+        jsonMap.put("country","DE");
+        jsonMap.put("lang","german");
+        JSONObject obj = new JSONObject(jsonMap);
+
+        FileUtils.writeStringToFile(tempFileleft, obj.toJSONString(), "UTF-8");
+        //FileUtils.writeStringToFile(tempFileleft, DataFrameJoin.NEW_LINE_DELIMETER, "UTF-8", true);
     }
 
     @Test
     public void testSuccess() throws Exception {
 
-        String[] args = new String[]{"-D" + ReadWriteAvroParquetFiles.INPUT_PATH + "=" + input,
-                "-D" + ReadWriteAvroParquetFiles.OUTPUT_PATH + "=" + output,
-                "-D" + ReadWriteAvroParquetFiles.IS_RUN_LOCALLY + "=true",
-                "-D" + ReadWriteAvroParquetFiles.DEFAULT_FS + "=file:///",
-                "-D" + ReadWriteAvroParquetFiles.NUM_PARTITIONS + "=1"};
+        String[] args = new String[]{"-D" + DataFrameJoin.PARQUET_INPUT_PATH + "=" + parquetInput,
+                "-D" + DataFrameJoin.JSON_INPUT_PATH + "=" + jsonInput,
+                "-D" + DataFrameJoin.OUTPUT_PATH + "=" + output,
+                "-D" + DataFrameJoin.IS_RUN_LOCALLY + "=true",
+                "-D" + DataFrameJoin.DEFAULT_FS + "=file:///",
+                "-D" + DataFrameJoin.NUM_PARTITIONS + "=1"};
 
-        ReadWriteAvroParquetFiles.main(args);
+        DataFrameJoin.main(args);
 
         ParquetReader<GenericRecord> reader = AvroParquetReader.builder(new Path(output)).build();
         //Use .withConf(FS.getConf()) for reading from a diferent HDFS and not local , by default the fs is local
@@ -78,5 +96,4 @@ public class ReadWriteAvroParquetFilesTest {
     public void cleanup() throws IOException {
         FileUtils.deleteDirectory(new File(BASEDIR));
     }
-
 }
