@@ -47,11 +47,6 @@ public class RDDtoCSVTest {
     }
 
     @Test
-    public void doNothing(){
-
-    }
-
-    //@Test
     public void testSuccess() throws Exception {
 
         String[] args = new String[]{"-D" + RDDtoCSV.INPUT_PATH + "=" + input,
@@ -62,7 +57,7 @@ public class RDDtoCSVTest {
 
         RDDtoCSV.main(args);
 
-        File outputFile = new File(output+"part-00000");
+        File outputFile = new File(output + "part-00000");
         String fileToString = FileUtils.readFileToString(outputFile, "UTF-8");
         System.out.println(fileToString);
 

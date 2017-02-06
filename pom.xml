@@ -92,6 +92,7 @@
         <htrace-core.version>3.0.4</htrace-core.version>
         <kryo.version>2.21</kryo.version>
         <spark-csv.version>1.5.0</spark-csv.version>
+        <json-simple>1.1.1</json-simple>
 
     </properties>
 
@@ -400,6 +401,11 @@
                 <artifactId>stringtemplate</artifactId>
                 <version>${stringtemplate.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.json-simple</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>${json-simple}</version>
             </dependency>
 
         </dependencies>
