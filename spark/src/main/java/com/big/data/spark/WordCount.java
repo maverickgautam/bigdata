@@ -74,7 +74,7 @@ public class WordCount extends Configured implements Tool, Closeable {
                 .mapToPair(word -> new Tuple2<String, Integer>(word, 1))
                 // The reduceByKey Api => only take the values , key is not fed in the api
                 // Before reduceByKey results into a shuffle hence breaking the DAG into stages
-                .combineByKey(i->i,(a,b)->a+b,(c, d)->c+d)
+                .reduceByKey((a,b)->a+b)
                 //.reduceByKey((count1, count2) -> count1 + count2)
                 // How many partitions to slpit the output into
                 .repartition(conf.getInt(conf.get(NUM_PARTITIONS), 1))
