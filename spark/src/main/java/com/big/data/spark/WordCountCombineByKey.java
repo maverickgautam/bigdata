@@ -16,11 +16,10 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Created by kunalgautam on 04.02.17.
+ * Created by kunalgautam on 07.02.17.
  */
-public class WordCount extends Configured implements Tool, Closeable {
+public class WordCountCombineByKey extends Configured implements Tool, Closeable {
     // The job extends Configured implements Tool for parsing argumenets .
-
 
     public static final String INPUT_PATH = "spark.input.path";
     public static final String OUTPUT_PATH = "spark.output.path";
@@ -72,9 +71,8 @@ public class WordCount extends Configured implements Tool, Closeable {
                 .flatMap(line -> Arrays.asList(line.split(" ")))
                 // New Tuple is being formed for every row the in the input
                 .mapToPair(word -> new Tuple2<String, Integer>(word, 1))
-                // The reduceByKey Api => only take the values , key is not fed in the api
-                // Before reduceByKey results into a shuffle hence breaking the DAG into stages
-                .combineByKey(i->i,(a,b)->a+b,(c, d)->c+d)
+
+                .combineByKey(i -> i, (a, b) -> a + b, (c, d) -> c + d)
                 //.reduceByKey((count1, count2) -> count1 + count2)
                 // How many partitions to slpit the output into
                 .repartition(conf.getInt(conf.get(NUM_PARTITIONS), 1))
@@ -90,7 +88,7 @@ public class WordCount extends Configured implements Tool, Closeable {
     }
 
     public static void main(String[] args) throws Exception {
-        ToolRunner.run(new WordCount(), args);
+        ToolRunner.run(new WordCountCombineByKey(), args);
     }
 
 }
