@@ -13,6 +13,10 @@
               "name": "emp_country",
               "type": "string"
         },
+        {      "name": "bonus",
+               "type": ["null", "long"],
+               "default": null
+        },
        {
              "name": "subordinates",
              "type": ["null", {"type": "map", "values": "string"}],
