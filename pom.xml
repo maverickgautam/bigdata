@@ -101,6 +101,7 @@
         <module>mapreduce</module>
         <module>spark</module>
         <module>avro-schema</module>
+        <module>kafka-unit</module>
     </modules>
 
     <scm>
