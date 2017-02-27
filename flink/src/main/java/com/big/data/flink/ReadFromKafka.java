@@ -4,7 +4,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer082;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
 
 /**
@@ -22,10 +22,14 @@ import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
  * 		--topic test --bootstrap.servers localhost:9092 --zookeeper.connect localhost:2181 --group.id myGroup
  *
  * Read from Kafka And write to HDFS.
+ *
+ * Version info
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.2/dev/connectors/kafka.html
  */
 public class ReadFromKafka {
     public static final String OUTPUT_PATH = "output.path";
     public static final String PARALLELISM = "parallelism";
+    public static final String TOPIC_NAME  = "topic";
 
 
 
@@ -34,10 +38,12 @@ public class ReadFromKafka {
         // create execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+
         // Using the parser provided by Flink
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
 
-        DataStream<String> messageStream = env.addSource(new FlinkKafkaConsumer082<>(parameterTool.getRequired("topic"), new SimpleStringSchema(), parameterTool.getProperties()));
+        //parameterTool.getProperties() returns back props with all key=value field set
+        DataStream<String> messageStream = env.addSource(new FlinkKafkaConsumer09<String>(parameterTool.getRequired(TOPIC_NAME), new SimpleStringSchema(), parameterTool.getProperties()));
 
         // the rebelance call is causing a repartitioning of the data so that all machines
         // see the messages (for example in cases when "num kafka partitions" < "num flink operators"

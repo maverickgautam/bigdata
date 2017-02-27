@@ -17,25 +17,42 @@
     <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-java</artifactId>
-        <version>0.9.1</version>
+        <version>1.2.0</version>
     </dependency>
     <dependency>
         <groupId>org.apache.flink</groupId>
-        <artifactId>flink-clients</artifactId>
-        <version>0.9.1</version>
+        <artifactId>flink-clients_2.10</artifactId>
+        <version>1.2.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-streaming-java_2.10</artifactId>
+        <version>1.2.0</version>
     </dependency>
 
     <!--Kafka Connector -->
     <dependency>
         <groupId>org.apache.flink</groupId>
-        <artifactId>flink-connector-kafka</artifactId>
-        <version>0.9.1</version>
+        <artifactId>flink-connector-kafka-0.9_2.10</artifactId>
+        <version>1.2.0</version>
     </dependency>
 
+
+
+    <!-- Embedded Kakfa + zookeper unit  Dependencies-->
+    <!-- kafka Unit jar has been relocated to avoid kafka version conflict as it used kafak_2_11 9.0.0.0 -->
     <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-clients</artifactId>
-        <version>0.9.1</version>
+        <groupId>com.big.data.</groupId>
+        <artifactId>kafka-unit-flink</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+
+
+
+    <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.9.1</version>
     </dependency>
 
 
