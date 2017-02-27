@@ -1,4 +1,4 @@
-package com.big.data.kafka.unit;
+package com.big.data.kafka.unit.flink;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Properties;
 
-
-
 public class KafkaUnitTest {
 
     public static final Logger log = LoggerFactory.getLogger(KafkaUnitTest.class);
@@ -31,7 +29,6 @@ public class KafkaUnitTest {
     @ClassRule
     public static KakaUnit cluster = new KakaUnit(1);
     // KakaUnit(1)  number of Broker in the cluster
-
 
     @Before
     public void testKafkaUnit() throws Throwable {
@@ -52,7 +49,6 @@ public class KafkaUnitTest {
         props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-
 
         Producer<String, String> producer = new KafkaProducer<>(props);
 
@@ -92,7 +88,6 @@ public class KafkaUnitTest {
     public void genericConsumerTest() {
         producerTest();
 
-
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getConfig().getKafkaBrokerString());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
@@ -105,18 +100,16 @@ public class KafkaUnitTest {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
 
         consumer.subscribe(Arrays.asList(TOPIC));
-        while (true) {
-            producerTest();
-            ConsumerRecords<String, String> records = consumer.poll(100);
-            for (ConsumerRecord<String, String> record : records)
-                System.out.printf("OUTPUT = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
-        }
 
-//        Assert.assertEquals(consumer.r.size(), 10);
+        ConsumerRecords<String, String> consumerRecords = consumer.poll(100);
+        for (ConsumerRecord<String, String> record : consumerRecords)
+            System.out.printf("OUTPUT = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
+
+//        Assert.assertEquals(consumer..size(), 10);
 //        Assert.assertEquals(consumer.resultQueue().contains("www.example.com,192.168.2.0"), true);
 //        Assert.assertEquals(consumer.resultQueue().contains("www.example.com,192.168.2.9"), true);
 //        Assert.assertEquals(consumer.resultQueue().contains("www.example.com,192.168.2.5"), true);
-//        consumer.close();
+        consumer.close();
     }
 
     @After

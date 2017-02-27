@@ -29,7 +29,7 @@
         <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
         <maven.sonar.maven.plugin.version>2.7</maven.sonar.maven.plugin.version>
         <maven.avro.plugin.version>1.8.1</maven.avro.plugin.version>
-        <maven.shaded.plugin>2.4.1</maven.shaded.plugin>
+        <maven.shaded.plugin>3.0.0</maven.shaded.plugin>
         <maven.gatling.plugin>2.2.1</maven.gatling.plugin>
         <maven.scala.plugin>3.2.1</maven.scala.plugin>
 
@@ -102,6 +102,8 @@
         <module>spark</module>
         <module>avro-schema</module>
         <module>kafka-unit</module>
+        <module>flink</module>
+        <module>kafka-unit-flink</module>
     </modules>
 
     <scm>
@@ -116,6 +118,10 @@
         <repository>
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
+        <repository>
+            <id>jodaTime</id>
+            <url>https://mvnrepository.com/artifact/joda-time/joda-time</url>
         </repository>
     </repositories>
 
