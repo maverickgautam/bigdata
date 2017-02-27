@@ -35,7 +35,7 @@ public class KafkaUnitAdmin {
 
 
 
-    public KafkaUnitAdmin(KakaUnit unit) throws Exception {
+    public KafkaUnitAdmin(KafkaUnit unit) throws Exception {
         zkClient = new ZkClient(unit.getConfig().getZkString(), sessionTimeout, waitTime, zkSerializer);
         zkUtils = new ZkUtils(zkClient, new ZkConnection(unit.getConfig().getZkString()), false);
 

@@ -7,15 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class KakaUnit extends ExternalResource {
+public class KafkaUnit extends ExternalResource {
 
     private List<KafkaBroker> brokerList;
     private Integer[] kafkaPorts;
     private String path;
     private final com.big.data.kafka.unit.flink.EmbeddedZookeeper zookeeper;
-    kafkaUnitConfig config;
+    KafkaUnitConfig config;
 
-    public KakaUnit(int clusterSize) {
+    public KafkaUnit(int clusterSize) {
 
         zookeeper = new EmbeddedZookeeper();
 
@@ -42,7 +42,7 @@ public class KakaUnit extends ExternalResource {
             brokerList.add(broker);
 
         }
-        config = new kafkaUnitConfig(zookeeper.getConfig().getZkstring(), brokerList);
+        config = new KafkaUnitConfig(zookeeper.getConfig().getZkstring(), brokerList);
     }
 
     @Override
@@ -60,16 +60,16 @@ public class KakaUnit extends ExternalResource {
         }
     }
 
-    public kafkaUnitConfig getConfig() {
+    public KafkaUnitConfig getConfig() {
         return config;
     }
 
-    public static class kafkaUnitConfig {
+    public static class KafkaUnitConfig {
 
         private String zkString;
         private String kafkaBrokerString;
 
-        public kafkaUnitConfig(String zkString, List<KafkaBroker> brokerList) {
+        public KafkaUnitConfig(String zkString, List<KafkaBroker> brokerList) {
 
             this.zkString = zkString;
             // Form

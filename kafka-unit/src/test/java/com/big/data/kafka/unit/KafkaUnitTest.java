@@ -29,7 +29,7 @@ public class KafkaUnitTest {
     private KafkaUnitAdmin admin;
 
     @ClassRule
-    public static KakaUnit cluster = new KakaUnit(1);
+    public static KafkaUnit cluster = new KafkaUnit(1);
     // KakaUnit(1)  number of Broker in the cluster
 
 
@@ -75,7 +75,7 @@ public class KafkaUnitTest {
         } catch (InterruptedException ie) {
         }
 
-        kafkaGenericConsumer consumer = new kafkaGenericConsumer(cluster.getConfig().getZkString(), "1", TOPIC);
+        KafkaGenericConsumer consumer = new KafkaGenericConsumer(cluster.getConfig().getZkString(), "1", TOPIC);
         consumer.run(1);
         try {
             Thread.sleep(1000);

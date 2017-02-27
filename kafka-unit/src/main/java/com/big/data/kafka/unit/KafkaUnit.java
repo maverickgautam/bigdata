@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class KakaUnit extends ExternalResource {
+public class KafkaUnit extends ExternalResource {
 
     private List<KafkaBroker> brokerList;
     private Integer[] kafkaPorts;
@@ -15,7 +15,7 @@ public class KakaUnit extends ExternalResource {
     private final EmbeddedZookeeper zookeeper;
     kafkaUnitConfig config;
 
-    public KakaUnit(int clusterSize) {
+    public KafkaUnit(int clusterSize) {
 
         zookeeper = new EmbeddedZookeeper();
 

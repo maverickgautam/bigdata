@@ -15,14 +15,14 @@ public class EmbeddedZookeeper extends ExternalResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedZookeeper.class);
     private TestingServer zkServer;
     private EmbeddedZookeeperConfig config;
-    private String zookeperPath;
+
 
     @Override
     protected void before() throws Throwable {
         config = new EmbeddedZookeeperConfig();
         // Random free port being used
 
-        zookeperPath = "/tmp/EmbeddedZookeeper/"+UUID.randomUUID().toString();
+        String zookeperPath = "/tmp/EmbeddedZookeeper/"+UUID.randomUUID().toString();
         File file = new File(zookeperPath);
         file.deleteOnExit();
         zkServer = new TestingServer(config.zookeperPort, file);

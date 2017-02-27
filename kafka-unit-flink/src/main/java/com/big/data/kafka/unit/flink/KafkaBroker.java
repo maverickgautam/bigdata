@@ -36,7 +36,6 @@ public class KafkaBroker {
         props.setProperty("zookeeper.connect", config.getZkString());
         props.setProperty("zookeeper.connection.timeout.ms", "1000000");
         props.setProperty("controlled.shutdown.enable", Boolean.TRUE.toString());
-        //props.setProperty("num.partitions", String.valueOf(1));
         props.setProperty("delete.topic.enable", "true");
 
         kafkaConfig = new KafkaConfig(props);
