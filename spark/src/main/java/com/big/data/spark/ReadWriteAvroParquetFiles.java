@@ -73,9 +73,10 @@ public class ReadWriteAvroParquetFiles extends Configured implements Tool, Close
 
         // Avro schema to StructType conversion
         final StructType outPutSchemaStructType = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
+        final StructType inputSchema = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
 
         // read data from parquetfile, the schema of the data is taken from the avro schema
-        DataFrame inputDf = sqlContext.read().format(Employee.class.getCanonicalName()).parquet(inputPath);
+        DataFrame inputDf = sqlContext.read().schema(inputSchema).format(Employee.class.getCanonicalName()).parquet(inputPath);
 
         // convert DataFrame into JavaRDD
         // the rows read from the parquetfile is converted into a Row object . Row has same schema as that of the parquet file roe
