@@ -109,6 +109,9 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
         JavaRDD<Row> returnedRowJavaRDD = rowJavaRDD.map(new InsetIntoAerospike(aerospikeHostname, aerospikePort, namespace, setName, keyName,
                                                                                 valueName));
 
+        //Map is just a transformation in Spark hence a action like write(), collect() is needed to carry out the action.
+        // Remeber spark does Lazy evaluation, without a action transformations will not execute.
+
         DataFrame outputDf = sqlContext.createDataFrame(returnedRowJavaRDD, outPutSchemaStructType);
 
         // Convert JavaRDD to dataframe and save into parquet file
@@ -133,6 +136,10 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
         private final String keyColumnName;
         private final String valueColumnName;
 
+        // The Aerospike client is not serializable and neither there is a need to instatiate on driver
+        private transient AerospikeClient client;
+        private transient WritePolicy policy;
+
         public InsetIntoAerospike(String hostName, int portNo, String nameSpace, String setName, String keyColumnName, String valueColumnName) {
             this.aerospikeHostName = hostName;
             this.aerospikePortNo = portNo;
@@ -140,26 +147,40 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
             this.aerospikeSetName = setName;
             this.keyColumnName = keyColumnName;
             this.valueColumnName = valueColumnName;
+
+            //Add Shutdown hook to close the client gracefully
+            //This is the place where u can gracefully clean your Service resources as there is no cleanup() function in Spark Map
+            JVMShutdownHook jvmShutdownHook = new JVMShutdownHook();
+            Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
+
         }
 
-        // The Aerospike client is not serializable and neither there is a need to instatiate on driver
-        private transient AerospikeClient client;
-        private transient WritePolicy policy;
+
 
         @Override
         public Row call(Row v1) throws Exception {
             // Intitialize on the first call
             if (client == null) {
                 policy = new WritePolicy();
+                // how to close the client gracefully ?
                 client = new AerospikeClient(aerospikeHostName, aerospikePortNo);
             }
 
             // As rows have schema with fieldName and Values being part of the Row
-            Key key = new Key(aerospikeNamespace, aerospikeSetName, (Integer)v1.get(v1.fieldIndex(keyColumnName)));
+            Key key = new Key(aerospikeNamespace, aerospikeSetName, (Integer) v1.get(v1.fieldIndex(keyColumnName)));
             Bin bin = new Bin(valueColumnName, (String) v1.get(v1.fieldIndex(valueColumnName)));
-            client.put(policy, key,bin);
+            client.put(policy, key, bin);
 
             return v1;
+        }
+
+        //When JVM is going down close the client
+        private class JVMShutdownHook extends Thread {
+            @Override
+            public void run() {
+                System.out.println("JVM Shutdown Hook: Thread initiated , shutting down service gracefully");
+                IOUtils.closeQuietly(client);
+            }
         }
     }
 
