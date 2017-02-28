@@ -47,12 +47,14 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.twitter</groupId>
-            <artifactId>parquet-avro</artifactId>
+            <groupId>com.aerospike</groupId>
+            <artifactId>aerospike-client</artifactId>
+            <version>${aerospike.client.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.twitter</groupId>
-            <artifactId>parquet-avro</artifactId>
+            <groupId>com.aerospike.unit</groupId>
+            <artifactId>aerospike-unit</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
