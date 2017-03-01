@@ -44,7 +44,6 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
     public static final String KEY_NAME = "avro.key.name";
     public static final String VALUE_NAME = "avro.value.name";
 
-    private static final String NEW_LINE_DELIMETER = "\n";
 
     private SQLContext sqlContext;
     private JavaSparkContext javaSparkContext;

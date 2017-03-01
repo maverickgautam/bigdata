@@ -52,8 +52,6 @@ public class ReadKeysFromHdfsgetValuesfromAerospikeSpark extends Configured impl
 
     public static final String EMPLOYEE_COUNTRY_KEY_NAME = "emp_country";
 
-    private static final String NEW_LINE_DELIMETER = "\n";
-
     private SQLContext sqlContext;
     private JavaSparkContext javaSparkContext;
 
@@ -90,7 +88,6 @@ public class ReadKeysFromHdfsgetValuesfromAerospikeSpark extends Configured impl
         String namespace = conf.get(AEROSPIKE_NAMESPACE);
         String setName = conf.get(AEROSPIKE_SETNAME);
 
-        String keyName = conf.get(KEY_NAME);
         String valueName = conf.get(VALUE_NAME);
 
         //Get spark context, This is the central context , which can be wrapped in Any Other context
