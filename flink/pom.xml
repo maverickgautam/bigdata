@@ -46,6 +46,11 @@
         <artifactId>kafka-unit-flink</artifactId>
         <version>${project.version}</version>
     </dependency>
+    <dependency>
+        <groupId>com.aerospike.unit</groupId>
+        <artifactId>aerospike-unit</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </dependency>
 
 
 

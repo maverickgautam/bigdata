@@ -27,51 +27,15 @@ import java.util.UUID;
 public class ReadFromKafkaTest {
 
     public static final Logger log = LoggerFactory.getLogger(ReadFromKafkaTest.class);
-
+    public static final String TOPIC = "TOPIC";
     private static final String LOCAL_FILEURI_PREFIX = "file://";
     private static final String NEW_LINE_DELIMETER = "\n";
-    public static final String TOPIC = "TOPIC";
+    @ClassRule
+    public static KafkaUnit cluster = new KafkaUnit(1);
     private static KafkaUnitAdmin admin;
     private static String baseDir;
     private static String outputDir;
-
-    @ClassRule
-    public static KafkaUnit cluster = new KafkaUnit(1);
-    // KakaUnit(1)  number of Broker in the cluster
-
-    public class MyThread extends Thread {
-
-        public void run() {
-            System.out.println("MyThread running");
-            //--topic test --bootstrap.servers localhost:9092 --zookeeper.connect localhost:2181 --group.id myGroup
-            String[] args = new String[]{"--topic", TOPIC, "--bootstrap.servers", cluster.getConfig().getKafkaBrokerString(), "--zookeeper.connect",
-                    cluster.getConfig().getZkString(), "--group.id", "myGroup", "--auto.offset.reset", "earliest", "--" + ReadFromKafka.OUTPUT_PATH,
-                    LOCAL_FILEURI_PREFIX + outputDir, "--" + WordCount.PARALLELISM, "1"};
-            try {
-                ReadFromKafka.main(args);
-            } catch (Exception e) {
-                log.info("Execption occured while launching Flink Kafka consumer");
-            }
-
-        }
-    }
-
-    @Before
-    public void startup() throws Exception {
-
-        //  create topic in embedded Kafka Cluster
-        admin = new KafkaUnitAdmin(cluster);
-        admin.createTopic(TOPIC, 1, 1, new Properties());
-
-        //Input Directory
-        baseDir = "/tmp/mapreduce/wordcount/" + UUID.randomUUID().toString();
-
-        //OutPutDirectory
-        outputDir = baseDir + "/output";
-
-        // produce data in Embedded Kafka (Kafka Unit)
-        producerDatainKafka();
-    }
+    // KakaUnit(1)  number of Broker in the kafkaUnitCluster
 
     public static void producerDatainKafka() {
         long events = 10;
@@ -97,6 +61,23 @@ public class ReadFromKafkaTest {
             producer.flush();
         }
         producer.close();
+    }
+
+    @Before
+    public void startup() throws Exception {
+
+        //  create topic in embedded Kafka Cluster
+        admin = new KafkaUnitAdmin(cluster);
+        admin.createTopic(TOPIC, 1, 1, new Properties());
+
+        //Input Directory
+        baseDir = "/tmp/mapreduce/wordcount/" + UUID.randomUUID().toString();
+
+        //OutPutDirectory
+        outputDir = baseDir + "/output";
+
+        // produce data in Embedded Kafka (Kafka Unit)
+        producerDatainKafka();
     }
 
     @Test
@@ -144,6 +125,26 @@ public class ReadFromKafkaTest {
     @After
     public void deleteTopic() {
         admin.deleteTopic(TOPIC);
+    }
+    public class MyThread extends Thread {
+
+        public void run() {
+            System.out.println("MyThread running");
+            //--topic test --bootstrap.servers localhost:9092 --zookeeper.connect localhost:2181 --group.id myGroup
+            String[] args = new String[]{"--topic", TOPIC,
+                    "--bootstrap.servers", cluster.getConfig().getKafkaBrokerString(),
+                    "--zookeeper.connect", cluster.getConfig().getZkString(),
+                    "--group.id", "myGroup",
+                    "--auto.offset.reset", "earliest",
+                    "--" + ReadFromKafka.OUTPUT_PATH, LOCAL_FILEURI_PREFIX + outputDir,
+                    "--" + WordCount.PARALLELISM, "1"};
+            try {
+                ReadFromKafka.main(args);
+            } catch (Exception e) {
+                log.info("Execption occured while launching Flink Kafka consumer");
+            }
+
+        }
     }
 
 }
