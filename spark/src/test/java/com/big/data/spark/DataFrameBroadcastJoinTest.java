@@ -52,8 +52,8 @@ public class DataFrameBroadcastJoinTest {
         employee.setEmpCountry("DE");
 
         //Write parquet file with GZIP compression
-        ParquetWriter<Object> writer = AvroParquetWriter.builder(new Path(parquetInput + "1.gz.parquet")).withCompressionCodec
-                (CompressionCodecName.GZIP).withSchema(Employee.getClassSchema()).build();
+        ParquetWriter<Object> writer = AvroParquetWriter.builder(new Path(parquetInput + "1.gz.parquet")).
+                withCompressionCodec(CompressionCodecName.GZIP).withSchema(Employee.getClassSchema()).build();
         writer.write(employee);
         writer.close();
 
@@ -85,8 +85,7 @@ public class DataFrameBroadcastJoinTest {
         //Use .withConf(FS.getConf()) for reading from a diferent HDFS and not local , by default the fs is local
 
         GenericData.Record event = (GenericData.Record) reader.read();
-        Employee outputEvent = AvroUtils.convertByteArraytoAvroPojo(AvroUtils.convertAvroPOJOtoByteArray(event, Employee.getClassSchema
-                ()), Employee.getClassSchema());
+        Employee outputEvent = AvroUtils.convertByteArraytoAvroPojo(AvroUtils.convertAvroPOJOtoByteArray(event, Employee.getClassSchema()), Employee.getClassSchema());
         reader.close();
         LOG.info("Data read from Sparkoutput is {}", outputEvent.toString());
         Assert.assertEquals(employee.getEmpId(), outputEvent.getEmpId());
