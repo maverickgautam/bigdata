@@ -1,11 +1,12 @@
 package com.big.data.spark;
 
 import com.aerospike.client.AerospikeClient;
-import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import com.aerospike.client.policy.WritePolicy;
 import com.big.data.avro.schema.Employee;
 import com.databricks.spark.avro.SchemaConverters;
+import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -14,19 +15,27 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.types.Metadata;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.apache.spark.sql.types.DataTypes.StringType;
 
 /**
- * Created by kunalgautam on 28.02.17.
+ * Created by kunalgautam on 01.03.17.
  */
-public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Tool, Closeable {
+public class ReadKeysFromHdfsgetValuesfromAerospikeSparkMapPartition extends Configured implements Tool, Closeable {
 
     public static final String INPUT_PATH = "spark.input.path";
     public static final String OUTPUT_PATH = "spark.output.path";
@@ -43,6 +52,8 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
     // For Dem key is emp_id and value is emp_name
     public static final String KEY_NAME = "avro.key.name";
     public static final String VALUE_NAME = "avro.value.name";
+
+    public static final String EMPLOYEE_COUNTRY_KEY_NAME = "emp_country";
 
     private static final String NEW_LINE_DELIMETER = "\n";
 
@@ -95,10 +106,12 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
 
         // Avro schema to StructType conversion
         final StructType outPutSchemaStructType = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
-        final StructType inputSchema = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
+
+        final StructType inputSchema = new StructType(new StructField[]{new StructField("emp_id", StringType, false, Metadata
+                .empty())});
 
         // read data from parquetfile, the schema of the data is taken from the avro schema
-        DataFrame inputDf = sqlContext.read().schema(inputSchema).parquet(inputPath);
+        DataFrame inputDf = sqlContext.read().schema(inputSchema).text(inputPath);
 
         // convert DataFrame into JavaRDD
         // the rows read from the parquetfile is converted into a Row object . Row has same schema as that of the parquet file roe
@@ -106,8 +119,8 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
 
         // Data read from parquet has same schema as that of avro (Empoyee Avro). Key is employeeId and value is EmployeeName
         // In the map there is no special function to initialize or shutdown the Aerospike client.
-        JavaRDD<Row> returnedRowJavaRDD = rowJavaRDD.map(new InsertIntoAerospike(aerospikeHostname, aerospikePort, namespace, setName, keyName,
-                                                                                 valueName));
+        JavaRDD<Row> returnedRowJavaRDD = rowJavaRDD.mapPartitions(new InsertIntoAerospike(aerospikeHostname, aerospikePort, namespace, setName,
+                                                                                           "emp_id", valueName));
 
         //Map is just a transformation in Spark hence a action like write(), collect() is needed to carry out the action.
         // Remeber spark does Lazy evaluation, without a action transformations will not execute.
@@ -125,8 +138,8 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
 
     // Do remember all the lambda function are instantiated on driver, serialized and sent to driver.
     // No need to initialize the Service(Aerospike , Hbase on driver ) hence making it transiet
-    // In the map , for each record insert into Aerospike , this can be coverted into batch too
-    public static class InsertIntoAerospike implements Function<Row, Row> {
+    // In the call() , for each record insert into Aerospike , this can be coverted into batch too
+    public static class InsertIntoAerospike implements FlatMapFunction<Iterator<Row>, Row> {
 
         // not making it static , as it will not be serialized and sent to executors
         private final String aerospikeHostName;
@@ -147,38 +160,59 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
             this.aerospikeSetName = setName;
             this.keyColumnName = keyColumnName;
             this.valueColumnName = valueColumnName;
-
-            //Add Shutdown hook to close the client gracefully
-            //This is the place where u can gracefully clean your Service resources as there is no cleanup() function in Spark Map
-            JVMShutdownHook jvmShutdownHook = new JVMShutdownHook();
-            Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
-
         }
 
         @Override
-        public Row call(Row row) throws Exception {
-            // Intitialize on the first call
-            if (client == null) {
-                policy = new WritePolicy();
-                // how to close the client gracefully ?
-                client = new AerospikeClient(aerospikeHostName, aerospikePortNo);
+        public Iterable<Row> call(Iterator<Row> rowIterator) throws Exception {
+
+            // rowIterator   points to the whole partition (all the records in the partition) , not a single record.
+            // The partition can be of Map Task or Reduce Task
+            // This is where you initialize your service , mapPartition resemble setup , map , cleanup of MapReduce,
+            // Drawback of mapPartition is it returns after processing the whole chunk not after every row.
+
+            // This will be held in memory till whole partition is evaluated
+            List<Row> rowList = new ArrayList<>();
+
+            //This is the place where you initialise your service
+            policy = new WritePolicy();
+            client = new AerospikeClient(aerospikeHostName, aerospikePortNo);
+
+            // All the code before iterating over  rowIterator will be executed only once as the call() is called only once for each partition
+
+            while (rowIterator.hasNext()) {
+
+                Row row = rowIterator.next();
+
+                String empID = (String) row.get(row.fieldIndex(keyColumnName));
+
+                // As rows have schema with fieldName and Values being part of the Row
+                Key key = new Key(aerospikeNamespace, aerospikeSetName, Integer.parseInt(empID));
+
+                //Get from Aerospike  for a given employee id the employeeName
+                Record result1 = client.get(policy, key);
+                Employee employee = new Employee();
+                employee.setEmpId(Integer.valueOf(empID));
+                employee.setEmpName(result1.getValue(valueColumnName).toString());
+
+                // This by default is available for Every key present in Aerospike
+                employee.setEmpCountry(result1.getValue(EMPLOYEE_COUNTRY_KEY_NAME).toString());
+
+                // creation of Employee object could have been skipped its just to make things clear
+                // Convert Employee Avro To Object[]
+                Object[] outputArray = new Object[Employee.getClassSchema().getFields().size()];
+                for (Schema.Field field : Employee.getClassSchema().getFields()) {
+                    outputArray[field.pos()] = employee.get(field.pos());
+
+                }
+
+                rowList.add(RowFactory.create(outputArray));
+
             }
 
-            // As rows have schema with fieldName and Values being part of the Row
-            Key key = new Key(aerospikeNamespace, aerospikeSetName, (Integer) row.get(row.fieldIndex(keyColumnName)));
-            Bin bin = new Bin(valueColumnName, (String) row.get(row.fieldIndex(valueColumnName)));
-            client.put(policy, key, bin);
+            //Shutdown the service gracefully as this is called only once for the whole partition
+            IOUtils.closeQuietly(client);
 
-            return row;
-        }
-
-        //When JVM is going down close the client
-        private class JVMShutdownHook extends Thread {
-            @Override
-            public void run() {
-                System.out.println("JVM Shutdown Hook: Thread initiated , shutting down service gracefully");
-                IOUtils.closeQuietly(client);
-            }
+            return rowList;
         }
     }
 
@@ -188,7 +222,7 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
     }
 
     public static void main(String[] args) throws Exception {
-        ToolRunner.run(new ReadFromHdfsWriteToAerospikeSpark(), args);
+        ToolRunner.run(new ReadKeysFromHdfsgetValuesfromAerospikeSparkMapPartition(), args);
     }
 
 }

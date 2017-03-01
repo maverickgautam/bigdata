@@ -1,11 +1,12 @@
 package com.big.data.spark;
 
 import com.aerospike.client.AerospikeClient;
-import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import com.aerospike.client.policy.WritePolicy;
 import com.big.data.avro.schema.Employee;
 import com.databricks.spark.avro.SchemaConverters;
+import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -17,16 +18,21 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.types.Metadata;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
 import java.io.Closeable;
 import java.io.IOException;
 
+import static org.apache.spark.sql.types.DataTypes.StringType;
+
 /**
- * Created by kunalgautam on 28.02.17.
+ * Created by kunalgautam on 01.03.17.
  */
-public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Tool, Closeable {
+public class ReadKeysFromHdfsgetValuesfromAerospikeSpark extends Configured implements Tool, Closeable {
 
     public static final String INPUT_PATH = "spark.input.path";
     public static final String OUTPUT_PATH = "spark.output.path";
@@ -43,6 +49,8 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
     // For Dem key is emp_id and value is emp_name
     public static final String KEY_NAME = "avro.key.name";
     public static final String VALUE_NAME = "avro.value.name";
+
+    public static final String EMPLOYEE_COUNTRY_KEY_NAME = "emp_country";
 
     private static final String NEW_LINE_DELIMETER = "\n";
 
@@ -95,10 +103,12 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
 
         // Avro schema to StructType conversion
         final StructType outPutSchemaStructType = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
-        final StructType inputSchema = (StructType) SchemaConverters.toSqlType(Employee.getClassSchema()).dataType();
+
+        final StructType inputSchema = new StructType(new StructField[]{new StructField("emp_id", StringType, false, Metadata
+                .empty())});
 
         // read data from parquetfile, the schema of the data is taken from the avro schema
-        DataFrame inputDf = sqlContext.read().schema(inputSchema).parquet(inputPath);
+        DataFrame inputDf = sqlContext.read().schema(inputSchema).text(inputPath);
 
         // convert DataFrame into JavaRDD
         // the rows read from the parquetfile is converted into a Row object . Row has same schema as that of the parquet file roe
@@ -106,7 +116,7 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
 
         // Data read from parquet has same schema as that of avro (Empoyee Avro). Key is employeeId and value is EmployeeName
         // In the map there is no special function to initialize or shutdown the Aerospike client.
-        JavaRDD<Row> returnedRowJavaRDD = rowJavaRDD.map(new InsertIntoAerospike(aerospikeHostname, aerospikePort, namespace, setName, keyName,
+        JavaRDD<Row> returnedRowJavaRDD = rowJavaRDD.map(new InsertIntoAerospike(aerospikeHostname, aerospikePort, namespace, setName, "emp_id",
                                                                                  valueName));
 
         //Map is just a transformation in Spark hence a action like write(), collect() is needed to carry out the action.
@@ -164,12 +174,30 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
                 client = new AerospikeClient(aerospikeHostName, aerospikePortNo);
             }
 
-            // As rows have schema with fieldName and Values being part of the Row
-            Key key = new Key(aerospikeNamespace, aerospikeSetName, (Integer) row.get(row.fieldIndex(keyColumnName)));
-            Bin bin = new Bin(valueColumnName, (String) row.get(row.fieldIndex(valueColumnName)));
-            client.put(policy, key, bin);
+            String empID = (String) row.get(row.fieldIndex(keyColumnName));
 
-            return row;
+            // As rows have schema with fieldName and Values being part of the Row
+            Key key = new Key(aerospikeNamespace, aerospikeSetName, Integer.parseInt(empID));
+
+            //Get from Aerospike  for a given employee id the employeeName
+            Record result1 = client.get(policy, key);
+            Employee employee = new Employee();
+            employee.setEmpId(Integer.valueOf(empID));
+            employee.setEmpName(result1.getValue(valueColumnName).toString());
+
+            // This by default is available for Every key present in Aerospike
+            employee.setEmpCountry(result1.getValue(EMPLOYEE_COUNTRY_KEY_NAME).toString());
+
+            // creation of Employee object could have been skipped its just to make things clear
+            // Convert Employee Avro To Object[]
+            Object[] outputArray = new Object[Employee.getClassSchema().getFields().size()];
+            for (Schema.Field field : Employee.getClassSchema().getFields()) {
+                outputArray[field.pos()] = employee.get(field.pos());
+
+            }
+
+            return RowFactory.create(outputArray);
+
         }
 
         //When JVM is going down close the client
@@ -188,7 +216,7 @@ public class ReadFromHdfsWriteToAerospikeSpark extends Configured implements Too
     }
 
     public static void main(String[] args) throws Exception {
-        ToolRunner.run(new ReadFromHdfsWriteToAerospikeSpark(), args);
+        ToolRunner.run(new ReadKeysFromHdfsgetValuesfromAerospikeSpark(), args);
     }
 
 }

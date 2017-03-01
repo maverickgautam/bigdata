@@ -28,12 +28,11 @@ import parquet.hadoop.metadata.CompressionCodecName;
 import java.io.File;
 
 /**
- * Created by kunalgautam on 28.02.17.
+ * Created by kunalgautam on 01.03.17.
  */
-public class ReadFromHdfsWriteToAerospikeSparkTest {
-
+public class ReadFromHdfsWriteToAerospikeSparkMapPartitionTest {
     private static final Logger LOG = LoggerFactory.getLogger(ReadWriteAvroParquetFilesTest.class);
-    private static final String BASEDIR = "/tmp/ReadFromHdfsWriteToAerospikeSparkTest/avroparquetInputFile/" + System.currentTimeMillis() + "/";
+    private static final String BASEDIR = "/tmp/ReadFromHdfsWriteToAerospikeSparkMapPartitionTest/avroparquetInputFile/" + System.currentTimeMillis() + "/";
     private String input;
     private String output;
 
@@ -86,18 +85,18 @@ public class ReadFromHdfsWriteToAerospikeSparkTest {
     public void testSuccess() throws Exception {
 
         String[] args = new String[]{"-D" + ReadWriteAvroParquetFiles.INPUT_PATH + "=" + input,
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.OUTPUT_PATH + "=" + output,
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.IS_RUN_LOCALLY + "=true",
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.DEFAULT_FS + "=file:///",
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.NUM_PARTITIONS + "=1",
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.AEROSPIKE_NAMESPACE + "=" + runtimConfig.getNameSpaceName(),
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.AEROSPIKE_HOSTNAME + "=127.0.0.1",
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.AEROSPIKE_PORT + "=" + runtimConfig.getServicePort(),
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.AEROSPIKE_SETNAME + "=" + setName,
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.KEY_NAME + "=emp_id",
-                "-D" + ReadFromHdfsWriteToAerospikeSpark.VALUE_NAME + "=emp_name"};
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.OUTPUT_PATH + "=" + output,
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.IS_RUN_LOCALLY + "=true",
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.DEFAULT_FS + "=file:///",
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.NUM_PARTITIONS + "=1",
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.AEROSPIKE_NAMESPACE + "=" + runtimConfig.getNameSpaceName(),
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.AEROSPIKE_HOSTNAME + "=127.0.0.1",
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.AEROSPIKE_PORT + "=" + runtimConfig.getServicePort(),
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.AEROSPIKE_SETNAME + "=" + setName,
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.KEY_NAME + "=emp_id",
+                "-D" + ReadFromHdfsWriteToAerospikeSparkMapPartition.VALUE_NAME + "=emp_name"};
 
-        ReadFromHdfsWriteToAerospikeSpark.main(args);
+        ReadFromHdfsWriteToAerospikeSparkMapPartition.main(args);
 
         ParquetReader<GenericRecord> reader = AvroParquetReader.builder(new Path(output)).build();
         //Use .withConf(FS.getConf()) for reading from a diferent HDFS and not local , by default the fs is local
@@ -136,6 +135,4 @@ public class ReadFromHdfsWriteToAerospikeSparkTest {
             client.close();
         }
     }
-
 }
-
