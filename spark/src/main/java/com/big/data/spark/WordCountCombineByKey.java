@@ -60,7 +60,7 @@ public class WordCountCombineByKey extends Configured implements Tool, Closeable
         String outputPath = conf.get(OUTPUT_PATH);
 
         //Get spark context, This is the central context , which can be wrapped in Any Other context
-        javaSparkContext = getJavaSparkContext(conf.getBoolean(IS_RUN_LOCALLY, Boolean.FALSE), conf.get(DEFAULT_FS), WordCount.class);
+        javaSparkContext = getJavaSparkContext(conf.getBoolean(IS_RUN_LOCALLY, Boolean.FALSE), conf.get(DEFAULT_FS), WordCountCombineByKey.class);
 
         // No input path has been read, no job has not been started yet .
         //To set any configuration use javaSparkContext.hadoopConfiguration().set(Key,value);
