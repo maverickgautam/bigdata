@@ -8,7 +8,14 @@ public class ClientClassAinSameSubPackage {
 
         // accessing superClassA from a client class in the same package as that of the superClass
         SuperClassA superClassA = new SuperClassA();
-        System.out.println("Parent class method call output is :  " + superClassA.getState());
+
+        //superClassA.getPrivateState() getPrivateState() private method is not visible
+
+        System.out.println("Parent class method call output for Public is :  " + superClassA.getPublicState());
+
+        //System.out.println("Parent class method call output for Protected is :  " + superClassA.getProtectedState());
+
+        //System.out.println("Parent class method call output for Default is :  " + superClassA.getDefaultState());
 
     }
 }
