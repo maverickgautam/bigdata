@@ -1,15 +1,15 @@
 package com.big.data.java.samples;
 
-class superClass {
+class SuperClass {
     final int b;
 
-    public superClass(int c) {
+    public SuperClass(int c) {
         this.b = c;
         System.out.println("I am inside super class Constructor  :   " + b);
     }
 }
 
-public class SubClass extends superClass {
+public class SubClass extends SuperClass {
 
     private String state = initializerMethod();
 
