@@ -10,7 +10,7 @@ public class LoopFor {
         // For loop consists of three part
         // Initialization , conditional check ,  expreseeion evaluation (increment decrement)
 
-        for (int i = 0; i <= 10; i++) {
+        for (int i = 0; i <= 3; i++) {
             System.out.println("value of i inside LOOP1 method is : " + i);
         }
 
@@ -25,7 +25,7 @@ public class LoopFor {
 
         int i = 0;
 
-        for (; i <= 10; i++) {
+        for (; i <= 3; i++) {
             System.out.println("value of i inside LOOP2 method is : " + i);
         }
 
@@ -44,7 +44,7 @@ public class LoopFor {
 
     private int getConditionSize() {
         System.out.println("getConditionSize is being called");
-        return 10;
+        return 3;
     }
 
     public void loop4() {
