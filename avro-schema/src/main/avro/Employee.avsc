@@ -3,24 +3,35 @@
     "type": "record",
     "fields": [{
             "name": "emp_id",
-            "type": "int"
+            "type": "int",
+            "doc": "employee Id of the employee"
         },
         {
              "name": "emp_name",
-             "type": "string"
+             "type": "string",
+             "doc": "employee name of the employee"
         },
         {
               "name": "emp_country",
-              "type": "string"
+              "type": "string",
+              "doc": "country of residence"
         },
         {      "name": "bonus",
                "type": ["null", "long"],
-               "default": null
+               "default": null,
+               "doc": "bonus received on a yearly basis"
         },
        {
-             "name": "subordinates",
-             "type": ["null", {"type": "map", "values": "string"}],
-             "default": null
-        }
+               "name": "subordinates",
+               "type": ["null", {"type": "map", "values": "string"}],
+               "default": null,
+               "doc": "map of subordinates Name and Designation"
+        },
+        {
+               "name": "departments",
+               "type":["null", {"type":"array", "items":"string" }],
+               "default":null,
+               "doc": "Departments under the employee"
+         }
         ]
  }

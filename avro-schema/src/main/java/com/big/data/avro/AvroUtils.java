@@ -156,4 +156,20 @@ public class AvroUtils {
         DatumReader<A> reader = new SpecificDatumReader<>(schema);
         return reader.read(null, decoder);
     }
+
+    /**
+     * Convert byte[] to AvroPOJO input needs to have both write and read schema
+     *
+     * @param bytes
+     * @param writerSchema
+     * @param readerSchema
+     * @param <A>
+     * @return
+     * @throws IOException
+     */
+    public static <A extends GenericRecord> A convertByteArraytoAvroPojo(byte[] bytes, Schema writerSchema, Schema readerSchema) throws IOException {
+        Decoder decoder = DecoderFactory.get().binaryDecoder(bytes, null);
+        DatumReader<A> reader = new SpecificDatumReader<>(writerSchema, readerSchema);
+        return reader.read(null, decoder);
+    }
 }
